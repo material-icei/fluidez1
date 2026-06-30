@@ -233,17 +233,9 @@ async function iniciarGrabacionAudio() {
 }
 
 function detenerGrabacionAudio() {
-  return new Promise((resolve) => {
-    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
-      state.mediaRecorder.onstop = () => {
-        state.audioBlob = new Blob(state.audioChunks, { type: 'audio/webm' });
-        resolve();
-      };
-      state.mediaRecorder.stop();
-    } else {
-      resolve();
-    }
-  });
+  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+    state.mediaRecorder.stop();
+  }
 }
 
 /* --- timer --- */
@@ -308,25 +300,17 @@ function detenerTodo() {
   state.recognizing = false;
 }
 
-async function finalizarLectura() {
+function finalizarLectura() {
   if (state.finished) return;
   state.finished = true;
-
-  detenerTimer();
-
-  if (state.recognition) {
-    try { state.recognition.stop(); } catch (_) {}
-  }
-
-  await detenerGrabacionAudio();
-
-  state.recognizing = false;
+  detenerTodo();
 
   const elapsedSeconds = state.startTimestamp
     ? Math.min(60, (Date.now() - state.startTimestamp) / 1000)
     : 60;
 
-  mostrarResultados(elapsedSeconds);
+  // pequeña espera para que termine de guardarse el blob de audio
+  setTimeout(() => mostrarResultados(elapsedSeconds), 350);
 }
 
 /* ---------- pantalla resultados ---------- */
@@ -436,3 +420,4 @@ async function enviarResultados(data) {
 
 /* inicialización */
 actualizarPreviewPalabras();
+
