@@ -84,10 +84,12 @@ document.getElementById('btn-config').addEventListener('click', () => {
 });
 
 /* ---------- pantalla configuración ---------- */
+/* ---------- URL de Apps Script ---------- */
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxvq95RdeFlheqXPFXZZWzklZEuoXh4xcTjbh40lPyH5F39uy2PBIFUSvJwkzvOQaXxnQ/exec';
+
 const inputStudent = document.getElementById('input-student');
 const inputGrade = document.getElementById('input-grade');
 const inputText = document.getElementById('input-text');
-const inputWebAppUrl = document.getElementById('input-webapp-url');
 const wordCountPreview = document.getElementById('word-count-preview');
 
 function actualizarPreviewPalabras() {
@@ -113,7 +115,7 @@ document.getElementById('btn-start-reading').addEventListener('click', () => {
   state.grade = inputGrade.value.trim() || '1º grado';
   state.text = texto;
   state.words = tokenizarTexto(texto);
-  state.webAppUrl = inputWebAppUrl.value.trim();
+  state.webAppUrl = WEB_APP_URL;
 
   prepararPantallaLectura();
   mostrarPantalla('screen-reading');
@@ -420,4 +422,3 @@ async function enviarResultados(data) {
 
 /* inicialización */
 actualizarPreviewPalabras();
-
