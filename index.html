@@ -46,15 +46,15 @@
     <div class="activity-card activity-card--soon" aria-disabled="true">
       <span class="card-eyebrow">Muy pronto</span>
       <span class="card-icon" aria-hidden="true">🧩</span>
-      <span class="card-title">Actividad 2</span>
-      <span class="card-desc">Fluidez lectora 2</span>
+      <span class="card-title">Sopa de sílabas</span>
+      <span class="card-desc">Armá palabras uniendo sílabas antes de que se acabe el tiempo.</span>
     </div>
 
     <div class="activity-card activity-card--soon" aria-disabled="true">
       <span class="card-eyebrow">Muy pronto</span>
       <span class="card-icon" aria-hidden="true">🔊</span>
-      <span class="card-title">Actividad 3</span>
-      <span class="card-desc">Fluidez lectora 3</span>
+      <span class="card-title">Eco de palabras</span>
+      <span class="card-desc">Escuchá una palabra y repetila lo más rápido y claro posible.</span>
     </div>
   </div>
 </section>
@@ -76,17 +76,44 @@
       <input type="text" id="input-grade" placeholder="Ej: 1º A" autocomplete="off" value="1º grado">
     </label>
 
-    <label class="field">
-      <span>Texto para leer</span>
-      <textarea id="input-text" rows="6" placeholder="Pegá o escribí acá el texto que va a leer el alumno..."></textarea>
-    </label>
-
-    <div class="field-row">
-      <button id="btn-text-sample" type="button" class="ghost-btn">📄 Usar texto de ejemplo</button>
-      <span class="word-count-preview" id="word-count-preview">0 palabras</span>
+    <!-- Biblioteca de lecturas -->
+    <div class="library-section">
+      <div class="library-header">
+        <span class="field-label">Elegir lectura</span>
+        <button id="btn-add-reading" type="button" class="ghost-btn ghost-btn--small">＋ Agregar lectura</button>
+      </div>
+      <div class="library-list" id="library-list">
+        <!-- se genera con JS -->
+      </div>
     </div>
 
+    <!-- Formulario agregar / editar -->
+    <div class="library-form" id="library-form" hidden>
+      <div class="library-form-inner">
+        <h3 id="library-form-title">Nueva lectura</h3>
+        <label class="field">
+          <span>Título</span>
+          <input type="text" id="lib-input-title" placeholder="Ej: La gallina" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>Texto</span>
+          <textarea id="lib-input-text" rows="4" placeholder="Escribí o pegá el texto aquí..."></textarea>
+        </label>
+        <div class="field-row">
+          <button id="btn-lib-save" type="button" class="primary-btn">Guardar lectura</button>
+          <button id="btn-lib-cancel" type="button" class="ghost-btn">Cancelar</button>
+        </div>
+      </div>
+    </div>
 
+    <!-- Texto seleccionado (editable) -->
+    <label class="field">
+      <span class="field-label-row">
+        Texto para leer
+        <span class="word-count-preview" id="word-count-preview"></span>
+      </span>
+      <textarea id="input-text" rows="5" placeholder="Seleccioná una lectura arriba, o escribí el texto acá directamente..."></textarea>
+    </label>
 
     <button class="primary-btn" id="btn-start-reading" type="button">Guardar y empezar lectura →</button>
   </div>
