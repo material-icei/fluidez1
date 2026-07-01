@@ -72,9 +72,15 @@ La primera vez que un alumno toque "Empezar a leer", Chrome va a pedir permiso p
 Reemplazar estos seis 60 por los segundos que se necesiten: el timer, el anillo, el texto y el cálculo de palabras por minuto.
 
 Línea   Qué hace
+
 15      timeLeft: 60 — valor inicial del estado
+
 146     state.timeLeft = 60 — reseteo al preparar la pantalla
+
 151     timerSecondsEl.textContent = '60' — lo que muestra el display al arrancar
+
 253     state.timeLeft / 60 — cálculo del anillo visual del cronómetro
+
 295     Texto del hint "Se va a detener solo a los 60 segundos"
+
 313–314 Math.min(60, ...) y : 60 — límite para el cálculo de WPM
