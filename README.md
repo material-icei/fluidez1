@@ -5,45 +5,29 @@ Archivos: `index.html`, `styles.css`, `app.js` (la app) y `Code.gs` (el backend 
 
 ---
 
-## 1. Probar la app sin Google (rápido)
-
-Podés abrir `index.html` directamente en Chrome para ver el diseño y probar la lectura.
-Sin conectar Apps Script, los resultados se muestran igual en pantalla, pero no se guardan en ningún lado.
-
-Para que el micrófono funcione, Chrome exige **https o localhost** (no funciona abriendo el archivo con doble clic en algunos casos). Si tenés problemas, subí los 3 archivos a un hosting simple (GitHub Pages, por ejemplo) o usá un servidor local:
-
-```
-cd lectura-app
-python3 -m http.server 8000
-```
-
-y abrí `http://localhost:8000`.
-
----
-
-## 2. Crear la Google Sheet
+## 1. Crear la Google Sheet
 
 1. Andá a [sheets.google.com](https://sheets.google.com) y creá una hoja nueva. Ponele de nombre, por ejemplo, **"Vuela Leyendo - Resultados"**.
 2. Mirá la URL. Vas a ver algo así:
    `https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrSt/edit`
    El **ID** es la parte entre `/d/` y `/edit`: `1AbCdEfGhIjKlMnOpQrSt`. Guardalo, lo vas a necesitar.
 
-## 3. Crear la carpeta de Drive para los audios
+## 2. Crear la carpeta de Drive para los audios
 
 1. Andá a [drive.google.com](https://drive.google.com) y creá una carpeta nueva, por ejemplo **"Audios Vuela Leyendo"**.
 2. Entrá a la carpeta y copiá el ID de la URL de la misma forma:
    `https://drive.google.com/drive/folders/1XyZ...` → el ID es `1XyZ...`.
 
-## 4. Pegar el código en Apps Script
+## 3. Pegar el código en Apps Script
 
 1. Desde la Google Sheet que creaste, andá a **Extensiones → Apps Script**.
 2. Borrá el contenido del archivo `Code.gs` que aparece por defecto y pegá ahí el contenido del archivo `Code.gs` de esta carpeta.
 3. Arriba del todo, reemplazá:
-   - `SHEET_ID` por el ID de la Sheet (paso 2).
-   - `DRIVE_FOLDER_ID` por el ID de la carpeta de Drive (paso 3).
+   - `SHEET_ID` por el ID de la Sheet (paso 1).
+   - `DRIVE_FOLDER_ID` por el ID de la carpeta de Drive (paso 2).
 4. Guardá el proyecto (ícono de disquete o `Ctrl+S`). Podés ponerle de nombre "Vuela Leyendo Backend".
 
-## 5. Publicar como aplicación web
+## 4. Publicar como aplicación web
 
 1. Arriba a la derecha, hacé clic en **Implementar → Nueva implementación**.
 2. En "Selecciona el tipo", elegí el ícono de engranaje y seleccioná **Aplicación web**.
@@ -57,11 +41,11 @@ y abrí `http://localhost:8000`.
 
 > Cada vez que modifiques `Code.gs`, tenés que hacer **Implementar → Administrar implementaciones → ✏️ editar → Nueva versión → Implementar** para que los cambios se apliquen a esa misma URL.
 
-## 6. Conectar la app web con Apps Script
+## 5. Conectar la app web con Apps Script
 
 1. Abrí la app (`index.html`) en Chrome.
 2. Entrá a **"Preparar texto y datos"**.
-3. Pegá la URL del paso 5 en el campo **"URL de Apps Script (Web App)"**.
+3. Pegá la URL del paso 4 en el campo **"URL de Apps Script (Web App)"**.
 4. Completá nombre del alumno, curso y el texto a leer, y arrancá la actividad.
 
 Al terminar la lectura, la app sube automáticamente:
@@ -83,3 +67,13 @@ El reconocimiento de voz es una ayuda automática, no es perfecto (un Chromebook
 ## Permisos del navegador
 
 La primera vez que un alumno toque "Empezar a leer", Chrome va a pedir permiso para usar el micrófono. Hay que aceptar "Permitir". Si quedó bloqueado por error, se puede volver a habilitar tocando el ícono de candado/micrófono en la barra de direcciones.
+
+## --->>>> Si se necesita cambiar el tiempo de cronómetro  <<<<-----
+Reemplazar estos seis 60 por los segundos que se necesiten: el timer, el anillo, el texto y el cálculo de palabras por minuto.
+Línea   Qué hace
+15      timeLeft: 60 — valor inicial del estado
+146     state.timeLeft = 60 — reseteo al preparar la pantalla
+151     timerSecondsEl.textContent = '60' — lo que muestra el display al arrancar
+253     state.timeLeft / 60 — cálculo del anillo visual del cronómetro
+295     Texto del hint "Se va a detener solo a los 60 segundos"
+313–314 Math.min(60, ...) y : 60 — límite para el cálculo de WPM
