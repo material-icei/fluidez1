@@ -2,8 +2,6 @@
    VUELA LEYENDO — lógica de la app
    ========================================================= */
 
-const TEXTO_EJEMPLO = `El gato Tom vive en una casa azul. Todos los días sale al jardín a jugar con una pelota roja. Le gusta correr, saltar y mirar las flores. A veces se sube a un árbol y desde ahí ve a los pájaros volar. Cuando se cansa, vuelve a su casa y toma un poco de leche.`;
-
 const state = {
   studentName: '',
   grade: '1º grado',
@@ -87,6 +85,172 @@ document.getElementById('btn-config').addEventListener('click', () => {
 /* ---------- URL de Apps Script ---------- */
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOG_FaM7FcVVi-7j8VzWOGlhV9UvD-wteVAH0hSpCZ3oC4IGBEx2IssSqqlIhw1U6e/exec';
 
+/* ---------- biblioteca de lecturas (5) ---------- */
+const LECTURAS_DEFAULT = [
+  {
+    id: 'default-1',
+    titulo: 'La gallina',
+    texto: 'Las gallinas son aves. Las aves ponen huevos. Las crías se llaman pollitos. Sus cuerpos están cubiertos de plumas. Tienen pico, alas y dos patas. Las gallinas se alimentan de gusanos, insectos y semillas. Viven en un gallinero y tienen alas pero no vuelan.',
+  },
+  {
+    id: 'default-2',
+    titulo: 'La máquina',
+    texto: 'Mi abuelo es inventor. Cuando fui a visitarlo, me invitó a su laboratorio. Tiene una máquina con muchos botones. Es una fábrica de gomitas de colores. Apretamos un botón y salieron miles de gomitas. Las llevé a la escuela para compartir con mis amigos.',
+  },
+  {
+    id: 'default-3',
+    titulo: 'Pedro, el conejo',
+    texto: 'El conejo Pedro tiene ocho hermanos. Todos se preparan para ir a la escuela. Mamá les pone muchas zanahorias de merienda en la mochila. Pedro es muy distraído. Siempre se olvida su mochila en casa. Pero como tiene muchos hermanos, siempre alguno le convida zanahorias. Le encanta ir a la escuela y compartir con sus amigos. No falta nunca a clases.',
+  },
+  {
+    id: 'default-4',
+    titulo: 'La vaca Victoria',
+    texto: 'La vaca Victoria se va de paseo, moviendo la cola con suave meneo. A su lado salta su ternero nuevo. ¡Es tan divertido correr en invierno!',
+  },
+  {
+    id: 'default-5',
+    titulo: 'Un teléfono inventado',
+    texto: 'María y Luis son amigos. Les gusta jugar. Tienen una gran idea. Con dos vasos de plástico y un hilo de lana hacen un teléfono. María y Luis salieron felices a jugar con su nuevo invento.',
+  },
+];
+
+/* ---- gestión de la biblioteca (localStorage) ---- */
+const STORAGE_KEY = 'vuelaleyendo_lecturas';
+
+function cargarBiblioteca() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function guardarBiblioteca(lecturas) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(lecturas));
+}
+
+function obtenerLecturas() {
+  return cargarBiblioteca() || LECTURAS_DEFAULT;
+}
+
+let lecturaSeleccionadaId = null;
+let editandoId = null;
+
+function renderBiblioteca() {
+  const lista = document.getElementById('library-list');
+  const lecturas = obtenerLecturas();
+  lista.innerHTML = '';
+
+  lecturas.forEach(lec => {
+    const card = document.createElement('div');
+    card.className = 'lib-card' + (lec.id === lecturaSeleccionadaId ? ' selected' : '');
+    card.dataset.id = lec.id;
+
+    const btnTitulo = document.createElement('button');
+    btnTitulo.className = 'lib-card-title';
+    btnTitulo.textContent = lec.titulo;
+    btnTitulo.type = 'button';
+    btnTitulo.addEventListener('click', () => seleccionarLectura(lec.id));
+
+    const acciones = document.createElement('div');
+    acciones.className = 'lib-card-actions';
+
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'lib-card-btn';
+    btnEdit.textContent = '✏️';
+    btnEdit.title = 'Editar';
+    btnEdit.type = 'button';
+    btnEdit.addEventListener('click', () => abrirFormEdicion(lec.id));
+
+    const btnDel = document.createElement('button');
+    btnDel.className = 'lib-card-btn del';
+    btnDel.textContent = '🗑️';
+    btnDel.title = 'Eliminar';
+    btnDel.type = 'button';
+    btnDel.addEventListener('click', () => eliminarLectura(lec.id));
+
+    acciones.appendChild(btnEdit);
+    acciones.appendChild(btnDel);
+    card.appendChild(btnTitulo);
+    card.appendChild(acciones);
+    lista.appendChild(card);
+  });
+}
+
+function seleccionarLectura(id) {
+  const lecturas = obtenerLecturas();
+  const lec = lecturas.find(l => l.id === id);
+  if (!lec) return;
+  lecturaSeleccionadaId = id;
+  inputText.value = lec.texto;
+  actualizarPreviewPalabras();
+  renderBiblioteca();
+}
+
+function abrirFormNuevo() {
+  editandoId = null;
+  document.getElementById('library-form-title').textContent = 'Nueva lectura';
+  document.getElementById('lib-input-title').value = '';
+  document.getElementById('lib-input-text').value = '';
+  document.getElementById('library-form').hidden = false;
+  document.getElementById('lib-input-title').focus();
+}
+
+function abrirFormEdicion(id) {
+  const lec = obtenerLecturas().find(l => l.id === id);
+  if (!lec) return;
+  editandoId = id;
+  document.getElementById('library-form-title').textContent = 'Editar lectura';
+  document.getElementById('lib-input-title').value = lec.titulo;
+  document.getElementById('lib-input-text').value = lec.texto;
+  document.getElementById('library-form').hidden = false;
+  document.getElementById('lib-input-title').focus();
+}
+
+function cerrarForm() {
+  document.getElementById('library-form').hidden = true;
+  editandoId = null;
+}
+
+function guardarDesdeForm() {
+  const titulo = document.getElementById('lib-input-title').value.trim();
+  const texto = document.getElementById('lib-input-text').value.trim();
+  if (!titulo) { alert('Falta el título de la lectura.'); return; }
+  if (!texto) { alert('Falta el texto de la lectura.'); return; }
+
+  const lecturas = obtenerLecturas();
+  if (editandoId) {
+    const idx = lecturas.findIndex(l => l.id === editandoId);
+    if (idx > -1) { lecturas[idx].titulo = titulo; lecturas[idx].texto = texto; }
+  } else {
+    lecturas.push({ id: 'custom-' + Date.now(), titulo, texto });
+  }
+  guardarBiblioteca(lecturas);
+  cerrarForm();
+  renderBiblioteca();
+  // si se editó la seleccionada, actualizamos el textarea
+  if (editandoId === lecturaSeleccionadaId) {
+    inputText.value = texto;
+    actualizarPreviewPalabras();
+  }
+}
+
+function eliminarLectura(id) {
+  if (!confirm('¿Eliminar esta lectura de la biblioteca?')) return;
+  const lecturas = obtenerLecturas().filter(l => l.id !== id);
+  guardarBiblioteca(lecturas);
+  if (lecturaSeleccionadaId === id) {
+    lecturaSeleccionadaId = null;
+    inputText.value = '';
+    actualizarPreviewPalabras();
+  }
+  renderBiblioteca();
+}
+
+document.getElementById('btn-add-reading').addEventListener('click', abrirFormNuevo);
+document.getElementById('btn-lib-save').addEventListener('click', guardarDesdeForm);
+document.getElementById('btn-lib-cancel').addEventListener('click', cerrarForm);
+
+/* ---- resto de la configuración ---- */
 const inputStudent = document.getElementById('input-student');
 const inputGrade = document.getElementById('input-grade');
 const inputText = document.getElementById('input-text');
@@ -94,12 +258,11 @@ const wordCountPreview = document.getElementById('word-count-preview');
 
 function actualizarPreviewPalabras() {
   const n = tokenizarTexto(inputText.value).length;
-  wordCountPreview.textContent = `${n} palabra${n === 1 ? '' : 's'}`;
+  wordCountPreview.textContent = n > 0 ? `· ${n} palabras` : '';
 }
-inputText.addEventListener('input', actualizarPreviewPalabras);
-
-document.getElementById('btn-text-sample').addEventListener('click', () => {
-  inputText.value = TEXTO_EJEMPLO;
+inputText.addEventListener('input', () => {
+  lecturaSeleccionadaId = null;
+  renderBiblioteca();
   actualizarPreviewPalabras();
 });
 
@@ -109,7 +272,7 @@ document.getElementById('btn-start-reading').addEventListener('click', () => {
   const nombre = inputStudent.value.trim();
   const texto = inputText.value.trim();
   if (!nombre) { alert('Falta escribir el nombre del alumno o alumna.'); inputStudent.focus(); return; }
-  if (!texto) { alert('Falta cargar el texto que va a leer.'); inputText.focus(); return; }
+  if (!texto) { alert('Falta seleccionar o escribir el texto que va a leer.'); return; }
 
   state.studentName = nombre;
   state.grade = inputGrade.value.trim() || '1º grado';
@@ -227,17 +390,22 @@ async function iniciarGrabacionAudio() {
   state.mediaRecorder.ondataavailable = (e) => {
     if (e.data.size > 0) state.audioChunks.push(e.data);
   };
-  state.mediaRecorder.onstop = () => {
-    state.audioBlob = new Blob(state.audioChunks, { type: 'audio/webm' });
-    stream.getTracks().forEach(t => t.stop());
-  };
   state.mediaRecorder.start();
 }
 
 function detenerGrabacionAudio() {
-  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+  return new Promise((resolve) => {
+    if (!state.mediaRecorder || state.mediaRecorder.state === 'inactive') {
+      resolve();
+      return;
+    }
+    state.mediaRecorder.onstop = () => {
+      state.audioBlob = new Blob(state.audioChunks, { type: 'audio/webm' });
+      state.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      resolve();
+    };
     state.mediaRecorder.stop();
-  }
+  });
 }
 
 /* --- timer --- */
@@ -295,24 +463,21 @@ btnRecord.addEventListener('click', async () => {
 
 btnStop.addEventListener('click', finalizarLectura);
 
-function detenerTodo() {
+async function detenerTodo() {
   detenerTimer();
   if (state.recognition) { try { state.recognition.stop(); } catch (_) {} }
-  detenerGrabacionAudio();
+  await detenerGrabacionAudio();
   state.recognizing = false;
 }
 
-function finalizarLectura() {
+async function finalizarLectura() {
   if (state.finished) return;
   state.finished = true;
-  detenerTodo();
-
   const elapsedSeconds = state.startTimestamp
     ? Math.min(60, (Date.now() - state.startTimestamp) / 1000)
     : 60;
-
-  // pequeña espera para que termine de guardarse el blob de audio
-  setTimeout(() => mostrarResultados(elapsedSeconds), 350);
+  await detenerTodo();
+  mostrarResultados(elapsedSeconds);
 }
 
 /* ---------- pantalla resultados ---------- */
@@ -421,4 +586,6 @@ async function enviarResultados(data) {
 }
 
 /* inicialización */
+renderBiblioteca();
 actualizarPreviewPalabras();
+
