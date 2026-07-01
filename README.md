@@ -70,6 +70,7 @@ La primera vez que un alumno toque "Empezar a leer", Chrome va a pedir permiso p
 
 ## --->>>> Si se necesita cambiar el tiempo de cronómetro  <<<<-----
 Reemplazar estos seis 60 por los segundos que se necesiten: el timer, el anillo, el texto y el cálculo de palabras por minuto.
+
 Línea   Qué hace
 15      timeLeft: 60 — valor inicial del estado
 146     state.timeLeft = 60 — reseteo al preparar la pantalla
