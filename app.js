@@ -227,17 +227,22 @@ async function iniciarGrabacionAudio() {
   state.mediaRecorder.ondataavailable = (e) => {
     if (e.data.size > 0) state.audioChunks.push(e.data);
   };
-  state.mediaRecorder.onstop = () => {
-    state.audioBlob = new Blob(state.audioChunks, { type: 'audio/webm' });
-    stream.getTracks().forEach(t => t.stop());
-  };
   state.mediaRecorder.start();
 }
 
 function detenerGrabacionAudio() {
-  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+  return new Promise((resolve) => {
+    if (!state.mediaRecorder || state.mediaRecorder.state === 'inactive') {
+      resolve();
+      return;
+    }
+    state.mediaRecorder.onstop = () => {
+      state.audioBlob = new Blob(state.audioChunks, { type: 'audio/webm' });
+      state.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      resolve();
+    };
     state.mediaRecorder.stop();
-  }
+  });
 }
 
 /* --- timer --- */
@@ -295,24 +300,21 @@ btnRecord.addEventListener('click', async () => {
 
 btnStop.addEventListener('click', finalizarLectura);
 
-function detenerTodo() {
+async function detenerTodo() {
   detenerTimer();
   if (state.recognition) { try { state.recognition.stop(); } catch (_) {} }
-  detenerGrabacionAudio();
+  await detenerGrabacionAudio();
   state.recognizing = false;
 }
 
-function finalizarLectura() {
+async function finalizarLectura() {
   if (state.finished) return;
   state.finished = true;
-  detenerTodo();
-
   const elapsedSeconds = state.startTimestamp
     ? Math.min(60, (Date.now() - state.startTimestamp) / 1000)
     : 60;
-
-  // pequeña espera para que termine de guardarse el blob de audio
-  setTimeout(() => mostrarResultados(elapsedSeconds), 350);
+  await detenerTodo();
+  mostrarResultados(elapsedSeconds);
 }
 
 /* ---------- pantalla resultados ---------- */
