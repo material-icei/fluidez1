@@ -85,7 +85,7 @@ document.getElementById('btn-config').addEventListener('click', () => {
 
 /* ---------- pantalla configuración ---------- */
 /* ---------- URL de Apps Script ---------- */
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxvq95RdeFlheqXPFXZZWzklZEuoXh4xcTjbh40lPyH5F39uy2PBIFUSvJwkzvOQaXxnQ/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOG_FaM7FcVVi-7j8VzWOGlhV9UvD-wteVAH0hSpCZ3oC4IGBEx2IssSqqlIhw1U6e/exec';
 
 const inputStudent = document.getElementById('input-student');
 const inputGrade = document.getElementById('input-grade');
