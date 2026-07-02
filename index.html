@@ -63,17 +63,16 @@
 <section id="screen-config" class="screen">
   <div class="config-panel">
     <button class="back-link" id="back-from-config" type="button">← Volver al menú</button>
-    <h2>Preparar la lectura</h2>
-    <p class="config-hint">Esto lo completa la maestra o el maestro antes de que el alumno lea.</p>
+   
 
     <label class="field">
       <span>Nombre del alumno o alumna</span>
-      <input type="text" id="input-student" placeholder="Ej: Martina Gómez" autocomplete="off">
+      <input type="text" id="input-student" placeholder="Nombre y apellido" autocomplete="off" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Nombre y apellido'">
     </label>
 
     <label class="field">
       <span>Curso / grado</span>
-      <input type="text" id="input-grade" placeholder="Ej: 1º A" autocomplete="off" value="1º grado">
+      <input type="text" id="input-grade" placeholder="Grado y Sección" autocomplete="off" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Grado y Sección'">
     </label>
 
     <!-- Biblioteca de lecturas -->
@@ -238,3 +237,4 @@
 <script src="app.js"></script>
 </body>
 </html>
+
