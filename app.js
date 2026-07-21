@@ -85,82 +85,37 @@ document.getElementById('btn-config').addEventListener('click', () => {
 /* ---------- URL de Apps Script ---------- */
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOG_FaM7FcVVi-7j8VzWOGlhV9UvD-wteVAH0hSpCZ3oC4IGBEx2IssSqqlIhw1U6e/exec';
 
-/* ---------- biblioteca de lecturas (15) ---------- */
+/* ---------- biblioteca de lecturas (6) ---------- */
 const LECTURAS_DEFAULT = [
   {
     id: 'default-1',
-    titulo: 'La gallina',
-    texto: 'Las gallinas son aves. Las aves ponen huevos. Las crías se llaman pollitos. Sus cuerpos están cubiertos de plumas. Tienen pico, alas y dos patas. Las gallinas se alimentan de gusanos, insectos y semillas. Viven en un gallinero y tienen alas pero no vuelan.',
+    titulo: 'LA GRAN CARRERA',
+    texto: 'Carlos y sus amigos organizaron una carrera en el parque. Todos llevaron sus patines para competir. La carrera comenzó  en la fuente y terminó en un  gran árbol. Carlos fue el primero  en llegar y ganó el premio. Después de la carrera, todos celebraron con helado.',
   },
   {
     id: 'default-2',
-    titulo: 'La máquina',
-    texto: 'Mi abuelo es inventor. Cuando fui a visitarlo, me invitó a su laboratorio. Tiene una máquina con muchos botones. Es una fábrica de gomitas de colores. Apretamos un botón y salieron miles de gomitas. Las llevé a la escuela para compartir con mis amigos.',
+    titulo: 'LA GRAN NUBE',
+    texto: 'Una nube gigante cubría el cielo. Pablo miraba hacia arriba mientras caminaba al parque. De repente, comenzó a llover, ero Pablo había traído su  paraguas, así que no se mojó. A pesar de la lluvia, Pablo siguió caminando y disfrutó del paseo bajo la lluvia.',
   },
   {
     id: 'default-3',
-    titulo: 'Pedro, el conejo',
-    texto: 'El conejo Pedro tiene ocho hermanos. Todos se preparan para ir a la escuela. Mamá les pone muchas zanahorias de merienda en la mochila. Pedro es muy distraído. Siempre se olvida su mochila en casa. Pero como tiene muchos hermanos, siempre alguno le convida zanahorias. Le encanta ir a la escuela y compartir con sus amigos. No falta nunca a clases.',
+    titulo: 'EL CASTILLO DE ARENA',
+    texto: 'En la playa, Tomás y su hermana construyeron un  castillo de arena gigante. Usaron cubos, palas y   conchas para decorarlo, Después de horas de trabajo, el castillo quedó hermoso.  Sin embargo, cuando la marea subió, el agua lo destruyó, Tomás y su hermana no se molestaron, y empezaron a construir otro.',
   },
   {
     id: 'default-4',
-    titulo: 'La vaca Victoria',
-    texto: 'La vaca Victoria se va de paseo, moviendo la cola con suave meneo. A su lado salta su ternero nuevo. ¡Es tan divertido correr en invierno!',
+    titulo: 'LA FLOR ROJA',
+    texto: 'A Sofía le encantan las flores. En su jardín, hay una flor roja muy especial que siempre cuida. Cada mañana, Sofía riega la flor y le habla  suavemente. La flor crece fuerte y alta, y Sofía está  muy orgullosa de su trabajo.',
   },
   {
     id: 'default-5',
-    titulo: 'Un teléfono inventado',
-    texto: 'María y Luis son amigos. Les gusta jugar. Tienen una gran idea. Con dos vasos de plástico y un hilo de lana hacen un teléfono. María y Luis salieron felices a jugar con su nuevo invento.',
+    titulo: 'EL GATO CURIOSO',
+    texto: 'El gato de Sofía se llama Mico. Siempre está explorando la casa y le gusta subir a los árboles del jardín. Un día, Mico encontró un ratón y lo siguió por todo el patio, pero no lo atrapó. Al final, Mico se cansó y se quedó dormido bajo el sol.',
   },
   {
     id: 'default-6',
-    titulo: 'Mi familia (31)',
-    texto: 'Mamá pasea en auto. Papá mira televisión y toma mate. El gato juega con la pelota de colores. Mi hermana Marisa pasea su oso por la cocina. Es un lindo día.',
-  },
-  {
-    id: 'default-7',
-    titulo: 'Mi mascota preferida (36)',
-    texto: 'Mi gato es juguetón. Camina por la casa cazando ratones. Toma agua y y come su comida. Juega con mi perro Tomi. Ellos son amigos. Sus casas están en el jardín debajo de un árbol alto.',
-  },
-  {
-    id: 'default-8',
-    titulo: 'Limpiando la vereda (38)',
-    texto: 'La vereda está sucia. Mamá barre y levanta las hojas que han caído. Luego lava la vereda con agua y con jabón. Mi perra Lana pasa y deja sus patas marcadas. Mamá se enoja, pero yo me divierto.',
-  },
-  {
-    id: 'default-9',
-    titulo: 'A bañarse (42)',
-    texto: 'Juan se baña en su bañadera. La llena con agua fría, porque hace mucho calor. Hace mucha espuma y pone sus juguetes preferidos. El pato y el barco flotan y se mueven por toda la bañadera. Juan se baña todos los días.',
-  },
-  {
-    id: 'default-10',
-    titulo: 'El robot de juguete (45)',
-    texto: 'Tai era un robot de juguete. Venía del planeta Feliz a hacer amigos en la Tierra. Conoció a Julio y juntos recorrieron muchos lugares. Hicieron cosas lindas como plantar flores, cuidar animales y no derrochar el agua. Julio le enseñó a cuidar el planeta Tierra.',
-  },
-  {
-    id: 'default-11',
-    titulo: 'La campana del pueblo (49)',
-    texto: 'En el pueblo las casas son bajas. Pero hay una torre muy alta. La torre tiene un gran reloj y una campana que suena fuerte. Algunas noches la campana suena sin parar. Nadie sabe por qué. La campana asusta a la gente del pueblo. Ellos dicen que está embrujada.',
-  },
-  {
-    id: 'default-12',
-    titulo: 'El gato travieso (49)',
-    texto: 'Mi abuela Manuela me regaló un gato pequeño. Sus bigotes son largos. El gato se llama Guillermo y es muy travieso. Cuando llego a casa, corre a saludarme. Dice miau. Me pide su leche y se la toma contento. Disfruta estar sentado en el sillón cuando nadie lo ve.',
-  },
-  {
-    id: 'default-13',
-    titulo: 'Los magos (56)',
-    texto: 'Agustina y Federico son hermanos. Siempre juegan a ser magos. Usan galera y capa de colores brillantes. Su conejo Tito es su mejor truco. Aparece y desaparece con las palabras mágicas. Un día Tito se perdió y no lo volvieron a encontrar. Se había escapado de su jaula. Tuvieron que reemplazarlo por un conejo de peluche.',
-  },
-  {
-    id: 'default-14',
-    titulo: 'El capitán pirata (56)',
-    texto: 'El capitán pirata tiene un barco grande. Tiene un ojo tapado y un pañuelo a lunares para no despeinarse con el viento. Es valiente y bueno. Navega por el mundo con otros piratas. Tiene un mapa del tesoro que está escondido en una isla lejana. Todas las noches sueña que lo encuentra y lo comparte con sus amigos marineros.',
-  },
-  {
-    id: 'default-15',
-    titulo: 'El caballo (58)',
-    texto: 'Alfredo tiene un caballo. El caballo se llama Risitas. Su pelo es de color marrón y su cola, larga y suave. Cuando le da de comer, muestra sus dientes como si se estuviese riendo. Risitas es muy cariñoso. Una vez se cayó saltando y se lastimó. El veterinario lo curó y ahora salta feliz por todo el campo.',
+    titulo: 'EL HORNO MÁGICO',
+    texto: 'Lucía y su abuela prepararon galletas en el horno. Mientras las galletas se horneaban, el aroma llenaba toda la cocina. Cuando sacaron las galletas, eran más grandes de Io esperado, Lucía estaba sorprendida y dijo que el horno era mágico. Las dos se rieron y disfrutaron de las galletas con  un vaso de leche.',
   },
 ];
 
