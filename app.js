@@ -10,7 +10,7 @@ const state = {
   webAppUrl: '',
   recognizedWords: [], // palabras reconocidas en orden (tal como llegan)
   heardSet: new Set(), // índices de palabras del texto ya marcadas como escuchadas
-  timeLeft: 90,       //valor incial 90 segundos
+  timeLeft: 60,
   timerId: null,
   startTimestamp: null,
   recognizing: false,
@@ -82,8 +82,10 @@ document.getElementById('btn-config').addEventListener('click', () => {
 });
 
 /* ---------- pantalla configuración ---------- */
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzf4EF0ouDuoetxj9LDsZSfRQ-5OBDI3xKLBG0A_-_bH9oDXjxsSyrr2fsYhs9D011C/exec';
+/* ---------- URL de Apps Script ---------- */
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOG_FaM7FcVVi-7j8VzWOGlhV9UvD-wteVAH0hSpCZ3oC4IGBEx2IssSqqlIhw1U6e/exec';
 
+/* ---------- biblioteca de lecturas (6) ---------- */
 const LECTURAS_DEFAULT = [
   {
     id: 'default-1',
@@ -310,12 +312,12 @@ function prepararPantallaLectura() {
     .map((w, idx) => `<span class="word" data-idx="${idx}">${w}</span>`)
     .join(' ');
 
-  state.timeLeft = 90;      // ---- reseteo al preparar la pantalla
+  state.timeLeft = 60;
   state.recognizedWords = [];
   state.heardSet = new Set();
   state.audioBlob = null;
   state.finished = false;
-  timerSecondsEl.textContent = '90';   //------- lo que muestra el display al arrancar
+  timerSecondsEl.textContent = '60';
   timerRingFg.style.strokeDashoffset = '0';
   statWords.textContent = '0';
   statStatus.classList.remove('live');
@@ -417,7 +419,7 @@ function iniciarTimer() {
   state.timerId = setInterval(() => {
     state.timeLeft -= 1;
     timerSecondsEl.textContent = String(Math.max(state.timeLeft, 0));
-    const offset = RING_CIRCUMFERENCE * (1 - state.timeLeft / 90);  //------ cálculo del anillo visual del cronómetro
+    const offset = RING_CIRCUMFERENCE * (1 - state.timeLeft / 60);
     timerRingFg.style.strokeDashoffset = String(offset);
     if (state.timeLeft <= 0) {
       finalizarLectura();
@@ -459,7 +461,7 @@ btnRecord.addEventListener('click', async () => {
   btnStop.hidden = false;
   statStatus.classList.add('live');
   statStatusLabel.textContent = 'grabando';
-  readingHint.textContent = 'Leé en voz alta y clara. Se va a detener solo a los 90 segundos.';   //---- la grabación se detiene a los 90 segundos
+  readingHint.textContent = 'Leé en voz alta y clara. Se va a detener solo a los 60 segundos.';
 
   iniciarTimer();
 });
@@ -477,8 +479,8 @@ async function finalizarLectura() {
   if (state.finished) return;
   state.finished = true;
   const elapsedSeconds = state.startTimestamp
-    ? Math.min(90, (Date.now() - state.startTimestamp) / 1000)
-    : 90;
+    ? Math.min(60, (Date.now() - state.startTimestamp) / 1000)
+    : 60;
   await detenerTodo();
   mostrarResultados(elapsedSeconds);
 }
@@ -591,6 +593,8 @@ async function enviarResultados(data) {
 /* inicialización */
 renderBiblioteca();
 actualizarPreviewPalabras();
+
+
 
 
 
