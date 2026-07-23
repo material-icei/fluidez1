@@ -82,7 +82,7 @@ document.getElementById('btn-config').addEventListener('click', () => {
 });
 
 /* ---------- pantalla configuración ---------- */
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxvq95RdeFlheqXPFXZZWzklZEuoXh4xcTjbh40lPyH5F39uy2PBIFUSvJwkzvOQaXxnQ/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzf4EF0ouDuoetxj9LDsZSfRQ-5OBDI3xKLBG0A_-_bH9oDXjxsSyrr2fsYhs9D011C/exec';
 
 const LECTURAS_DEFAULT = [
   {
