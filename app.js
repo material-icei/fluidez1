@@ -19,6 +19,11 @@ const state = {
   audioChunks: [],
   audioBlob: null,
   finished: false,
+  recognitionFatalError: false,
+  recognitionErrorNotified: false,
+  interimPendiente: [],
+  deteniendoDefinitivamente: false,
+  recognitionStopResolve: null,
 };
 
 /* ---------- utilidades de texto ---------- */
@@ -317,6 +322,11 @@ function prepararPantallaLectura() {
   state.heardSet = new Set();
   state.audioBlob = null;
   state.finished = false;
+  state.recognitionFatalError = false;
+  state.recognitionErrorNotified = false;
+  state.interimPendiente = [];
+  state.deteniendoDefinitivamente = false;
+  state.recognitionStopResolve = null;
   timerSecondsEl.textContent = '60';
   timerRingFg.style.strokeDashoffset = '0';
   statWords.textContent = '0';
@@ -347,34 +357,100 @@ function crearReconocedor() {
 
   rec.onresult = (event) => {
     let finalChunk = '';
+    let interimChunk = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
         finalChunk += ' ' + event.results[i][0].transcript;
+      } else {
+        interimChunk += ' ' + event.results[i][0].transcript;
       }
     }
     if (finalChunk.trim()) {
       const nuevas = tokenizarTexto(finalChunk);
       state.recognizedWords.push(...nuevas);
+      // ya se confirmó como final, así que no hay nada pendiente de esa tanda
+      state.interimPendiente = [];
       refrescarReconocimientoEnVivo();
+    } else if (interimChunk.trim()) {
+      // Todavía no es "final", pero lo guardamos por si la sesión se corta
+      // antes de confirmarlo (típico al leer lento, con pausas largas: el
+      // navegador cierra el reconocimiento por silencio y esa palabra se
+      // perdía para siempre porque nunca llegaba marcada isFinal).
+      state.interimPendiente = tokenizarTexto(interimChunk);
+      refrescarReconocimientoEnVivo(state.interimPendiente);
     }
   };
   rec.onerror = (e) => {
     console.warn('Error de reconocimiento de voz:', e.error);
+
+    // Errores que NO se solucionan reintentando: avisamos y dejamos de insistir.
+    const erroresFatales = ['not-allowed', 'service-not-allowed', 'audio-capture', 'language-not-supported'];
+    if (erroresFatales.includes(e.error)) {
+      state.recognitionFatalError = true;
+      if (!state.recognitionErrorNotified) {
+        state.recognitionErrorNotified = true;
+        const mensajes = {
+          'not-allowed': 'No se dio permiso para usar el micrófono para el reconocimiento de voz.',
+          'service-not-allowed': 'El navegador bloqueó el reconocimiento de voz.',
+          'audio-capture': 'No se pudo acceder al micrófono para reconocer el habla.',
+          'language-not-supported': 'El idioma es-AR no está disponible en este navegador.',
+        };
+        readingHint.textContent = `⚠️ ${mensajes[e.error]} El audio se sigue grabando, pero no se contarán palabras leídas.`;
+      }
+    } else if (e.error === 'network') {
+      // El reconocimiento de voz de Chrome necesita conexión a internet
+      // (usa un servidor en la nube, no funciona offline).
+      if (!state.recognitionErrorNotified) {
+        state.recognitionErrorNotified = true;
+        readingHint.textContent = '⚠️ Sin conexión a internet: el reconocimiento de voz no funciona offline. El audio se sigue grabando igual.';
+      }
+    }
+    // 'no-speech' y otros errores recuperables: no hacemos nada especial,
+    // onend se encarga de reiniciar el reconocimiento.
   };
   rec.onend = () => {
-    if (state.recognizing && !state.finished) {
-      // el navegador a veces corta el reconocimiento solo; lo reiniciamos si seguimos grabando
-      try { rec.start(); } catch (_) {}
+    // Si la sesión terminó (por ejemplo por una pausa larga => "no-speech")
+    // y había una palabra "interina" que nunca llegó a confirmarse como
+    // final, la damos por buena ahora: si no, se perdía sin dejar rastro.
+    if (state.interimPendiente && state.interimPendiente.length) {
+      state.recognizedWords.push(...state.interimPendiente);
+      state.interimPendiente = [];
+      refrescarReconocimientoEnVivo();
+    }
+
+    if (state.deteniendoDefinitivamente) {
+      // Este es el cierre "de verdad" (fin de la lectura): no reiniciamos,
+      // y avisamos a quien esté esperando (detenerReconocimientoDefinitivo).
+      state.deteniendoDefinitivamente = false;
+      if (state.recognitionStopResolve) {
+        const resolver = state.recognitionStopResolve;
+        state.recognitionStopResolve = null;
+        resolver();
+      }
+      return;
+    }
+
+    if (state.recognizing && !state.finished && !state.recognitionFatalError) {
+      // Reiniciamos con una pequeñísima espera: reiniciar en el mismo tick
+      // en que terminó puede chocar con un error interno del navegador
+      // ("ya está iniciado") que hace fallar el reinicio en silencio,
+      // dejando de reconocer nada más por el resto de la lectura.
+      setTimeout(() => {
+        if (state.recognizing && !state.finished && !state.recognitionFatalError) {
+          try { rec.start(); } catch (_) { /* ya estaba iniciado; se ignora */ }
+        }
+      }, 250);
     }
   };
   return rec;
 }
 
-function refrescarReconocimientoEnVivo() {
-  statWords.textContent = String(state.recognizedWords.length);
+function refrescarReconocimientoEnVivo(interinasPendientes) {
+  const pendientes = interinasPendientes || [];
+  statWords.textContent = String(state.recognizedWords.length + pendientes.length);
 
   const originalNorm = state.words.map(normalizarPalabra);
-  const escuchadoNorm = state.recognizedWords.map(normalizarPalabra);
+  const escuchadoNorm = [...state.recognizedWords, ...pendientes].map(normalizarPalabra);
   const { indicesMarcados } = calcularPalabrasCorrectas(originalNorm, escuchadoNorm);
 
   document.querySelectorAll('#reading-text .word').forEach(span => {
@@ -447,6 +523,15 @@ btnRecord.addEventListener('click', async () => {
     return;
   }
 
+  // Importante: marcamos "recognizing" ANTES de arrancar el reconocimiento.
+  // Si no, y el reconocimiento termina solo casi al instante (por ejemplo
+  // por un error de red o de micrófono), el onend no lo reinicia porque
+  // todavía ve recognizing=false, y el conteo de palabras se queda en 0
+  // toda la lectura sin ningún aviso.
+  state.recognizing = true;
+  state.finished = false;
+  state.recognitionErrorNotified = false;
+
   state.recognition = crearReconocedor();
   if (state.recognition) {
     try { state.recognition.start(); } catch (_) {}
@@ -454,8 +539,6 @@ btnRecord.addEventListener('click', async () => {
     readingHint.textContent = 'Este navegador no reconoce el habla automáticamente; igual se va a grabar el audio.';
   }
 
-  state.recognizing = true;
-  state.finished = false;
   btnRecord.classList.add('recording');
   recordBtnLabel.textContent = 'Leyendo...';
   btnStop.hidden = false;
@@ -468,9 +551,41 @@ btnRecord.addEventListener('click', async () => {
 
 btnStop.addEventListener('click', finalizarLectura);
 
+/* Detiene el reconocimiento "para siempre" (fin de la lectura) y espera a
+   que el navegador confirme el cierre (onend) antes de seguir. Así nos
+   aseguramos de que cualquier palabra "interina" pendiente se vuelque a
+   state.recognizedWords ANTES de calcular los resultados — si no, la
+   pantalla de resultados se armaba con el conteo casi vacío porque
+   corría antes de que el reconocimiento terminara de confirmar lo último
+   que se dijo. */
+function detenerReconocimientoDefinitivo() {
+  return new Promise((resolve) => {
+    if (!state.recognition || !state.recognizing) {
+      resolve();
+      return;
+    }
+    let resuelto = false;
+    const terminar = () => {
+      if (resuelto) return;
+      resuelto = true;
+      resolve();
+    };
+    state.recognitionStopResolve = terminar;
+    state.deteniendoDefinitivamente = true;
+    // Salvavidas: si por algún motivo el navegador nunca dispara "onend",
+    // no queremos que la app se quede colgada esperando para siempre.
+    setTimeout(terminar, 1500);
+    try {
+      state.recognition.stop();
+    } catch (_) {
+      terminar();
+    }
+  });
+}
+
 async function detenerTodo() {
   detenerTimer();
-  if (state.recognition) { try { state.recognition.stop(); } catch (_) {} }
+  await detenerReconocimientoDefinitivo();
   await detenerGrabacionAudio();
   state.recognizing = false;
 }
@@ -593,7 +708,5 @@ async function enviarResultados(data) {
 /* inicialización */
 renderBiblioteca();
 actualizarPreviewPalabras();
-
-
 
 
